@@ -1,0 +1,27 @@
+{
+  "name": "2d-voronoi-experiments",
+  "version": "1.0.0",
+  "description": "Series of visual experiments exploring Voronoi diagrams using JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "serve": "webpack-dev-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasonwebb/2d-voronoi-experiments.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jasonwebb/2d-voronoi-experiments/issues"
+  },
+  "homepage": "https://github.com/jasonwebb/2d-voronoi-experiments#readme",
+  "devDependencies": {
+    "d3-delaunay": "^4.1.5",
+    "path": "^0.12.7",
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.1"
+  }
+}
