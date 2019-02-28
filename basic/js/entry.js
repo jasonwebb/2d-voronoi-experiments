@@ -3,6 +3,14 @@ import { Delaunay } from "d3-delaunay";
 let showPoints = false,
   invertColors = false;
 
+const EVEN = 0,
+  ODD = 1,
+  ALTERNATING = 2,
+  ANY = 3;
+let ROW_TYPE = ALTERNATING;
+
+let currentRowType = EVEN;
+
 const sketch = function (p5) {
   /*
     Setup
@@ -37,6 +45,26 @@ const sketch = function (p5) {
 
       case 'i':
         invertColors = !invertColors;
+        generateNewShape();
+        break;
+
+      case '1':
+        ROW_TYPE = EVEN;
+        generateNewShape();
+        break;
+
+      case '2':
+        ROW_TYPE = ODD;
+        generateNewShape();
+        break;
+      
+      case '3':
+        ROW_TYPE = ALTERNATING;
+        generateNewShape();
+        break;
+
+      case '4':
+        ROW_TYPE = ANY;
         generateNewShape();
         break;
     }
@@ -83,16 +111,52 @@ const sketch = function (p5) {
 
     // Generate set of points for Voronoi diagram
     for(let i = 0; i < parseInt(p5.random(5,20)); i++) {
-      let numPoints;
+      let numPoints, range = [];
+
+      // Rings near the center look better with fewer points
       if(i < 3) {
-        numPoints = parseInt(p5.random(3,10));
+        range[0] = 3;
+        range[1] = 10;
       } else {
-        numPoints = parseInt(p5.random(20,50));
+        range[0] = 20;
+        range[1] = 50;
       }
 
+      // Generate a random number of points based on selected "row type"
+      switch(ROW_TYPE) {
+        case EVEN:
+          numPoints = getRandomEvenNumber(range[0], range[1]);
+          break;
+
+        case ODD:
+          numPoints = getRandomOddNumber(range[0], range[1]);
+          break;
+
+        case ALTERNATING:
+          switch(currentRowType) {
+            case EVEN:
+              numPoints = getRandomEvenNumber(range[0], range[1]);
+              currentRowType = ODD;
+              break;
+
+            case ODD:
+              numPoints = getRandomOddNumber(range[0], range[1]);
+              currentRowType = EVEN;
+              break;
+          }
+
+          break;
+
+        case ANY:
+          numPoints = parseInt(p5.random(range[0], range[1]));
+          break;
+      }
+
+      // Generate points arranged in a ring
       let newPoints = createPointsRing(window.innerWidth/2, window.innerHeight/2, lastRadius, numPoints);
       points = points.concat(newPoints);
       
+      // Ensure next radius is larger than previous radius
       lastRadius += p5.random(20,80);
     }
 
@@ -122,6 +186,34 @@ const sketch = function (p5) {
         p5.ellipse(point[0], point[1], 5);
       }
     }
+  }
+
+  function getRandomEvenNumber(min, max) {
+    let num = parseInt(p5.random(min, max));
+    
+    if(num % 2 > 0) {
+      if(num - 1 < min) {
+        num++;
+      } else {
+        num--;
+      }
+    }
+
+    return num;
+  }
+
+  function getRandomOddNumber(min, max) {
+    let num = parseInt(p5.random(min, max));
+    
+    if(num % 2 == 0) {
+      if(num - 1 < min) {
+        num++;
+      } else {
+        num--;
+      }
+    }
+
+    return num;
   }
 }
 
