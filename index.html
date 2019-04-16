@@ -26,14 +26,83 @@
   <meta name="twitter:title" content="2D Voronoi experiments in JavaScript">
   <meta name="twitter:description" content="">
   <meta name="twitter:image" content="social-media-preview.png">
+
+  <style>
+  @import url('https://fonts.googleapis.com/css?family=Didact+Gothic');
+
+  body {
+    padding: 20px 0;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    width: 70%;
+  }
+
+    ul li {
+      margin: 0;
+    }
+
+     ul li a {
+       display: block;
+       position: relative;
+     }
+
+      ul li a .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,.9);
+        opacity: 0;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity .5s ease-in-out;
+        font-family: 'Didact Gothic', sans-serif;
+        font-size: 60px;
+      }
+
+        ul li a:hover .overlay {
+          opacity: 1;
+        }
+
+      ul li a img,
+      ul li a video {
+        width: 100%;
+        height: auto;
+      }
+  </style>
 </head>
 
 <body>
   <ul>
     <li>
-      <a href="basic/">basic</a>
+      <a href="basic/">
+        <div class="overlay">Basic Voronoi</div>
+        <img src="images/basic.png" alt="Basic Voronoi">
+      </a>
+    </li>
+    
+    <li>
+      <a href="rings/">
+        <div class="overlay">Rings</div>
+        <img src="images/rings.png" alt="Rings">
+      </a>
+    </li>
+    
+    <li>
+      <a href="animated-rings/">
+        <div class="overlay">Animated rings</div>
+        <video autoplay="true" loop="true">
+          <source src="images/animated-rings.webm" type="video/webm">
+        </video>
+      </a>
     </li>
   </ul>
 </body>
-
 </html>
