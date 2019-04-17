@@ -19,7 +19,9 @@
   "homepage": "https://github.com/jasonwebb/2d-voronoi-experiments#readme",
   "devDependencies": {
     "d3-delaunay": "^4.1.5",
+    "file-saver": "^2.0.1",
     "path": "^0.12.7",
+    "svg-points": "^6.0.1",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.2.1"

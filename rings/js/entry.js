@@ -1,9 +1,12 @@
 import {Delaunay} from "d3-delaunay";
+import {toPath} from 'svg-points';
+import {saveAs} from 'file-saver';
 
 let showPoints = false,
   invertColors = false,
   points;
 
+// Number of points per ring/row
 const EVEN = 0,
   ODD = 1,
   ALTERNATING = 2,
@@ -51,6 +54,10 @@ const sketch = function (p5) {
       case 'i':
         invertColors = !invertColors;
         break;
+      
+      case 'e':
+        exportSVG();
+        break;
 
       case '1':
         ROW_TYPE = EVEN;
@@ -92,7 +99,7 @@ const sketch = function (p5) {
 
     p5.noFill();
 
-    const polygons = getVoronoiAsPolygons(points);
+    const polygons = getVoronoiPolygons();
 
     // Draw raw polygons
     for (const polygon of polygons) {
@@ -124,7 +131,7 @@ const sketch = function (p5) {
   }
 
   // Get an array of polygons (arrays of [x,y] pairs) using Voronoi
-  function getVoronoiAsPolygons(points) {
+  function getVoronoiPolygons() {
     const delaunay = Delaunay.from(points);
     const voronoi = delaunay.voronoi([0, 0, window.innerWidth, window.innerHeight]);
     const simplifiedPolygons = [];
@@ -153,7 +160,6 @@ const sketch = function (p5) {
     // Generate set of points for Voronoi diagram
     for (let i = 0; i < numRings; i++) {
       let numPoints, range = [];
-      let rotation = 0;
 
       // Rings near the center look better with fewer points
       if (i > 3) {
@@ -196,13 +202,15 @@ const sketch = function (p5) {
           break;
       }
 
+      // Generate 2D array of evenly-spaced points ([x,y]) in a circle
       for(let j = 0; j < numPoints; j++) {
         points.push([
-          window.innerWidth/2 + currentRadius * Math.cos(p5.radians((360 / numPoints) * j + rotation)),
-          window.innerHeight/2 + currentRadius * Math.sin(p5.radians((360 / numPoints) * j + rotation))
+          window.innerWidth/2 + currentRadius * Math.cos(p5.radians((360 / numPoints) * j)),
+          window.innerHeight/2 + currentRadius * Math.sin(p5.radians((360 / numPoints) * j))
         ]);
       }
 
+      // Decrease radius for next ring
       currentRadius -= radiusStep + p5.random(-radiusStep/2, radiusStep);
     }
   }
@@ -233,6 +241,56 @@ const sketch = function (p5) {
     }
 
     return num;
+  }
+
+  // Export an SVG file of the current geometry
+  function exportSVG() {
+    // Set up <svg> element
+    let svg = document.createElement('svg');
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+    svg.setAttribute('width', window.innerWidth);
+    svg.setAttribute('height', window.innerHeight);
+    svg.setAttribute('viewBox', '0 0 ' + window.innerWidth + ' ' + window.innerHeight);
+
+    let polygons = getVoronoiPolygons();
+
+    for(let polygon of polygons) {
+      svg.appendChild( createPathElFromPoints(polygon) );
+    }
+
+    // Force download of .svg file based on https://jsfiddle.net/ch77e7yh/1
+    let svgDocType = document.implementation.createDocumentType('svg', "-//W3C//DTD SVG 1.1//EN", "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd");
+    let svgDoc = document.implementation.createDocument('http://www.w3.org/2000/svg', 'svg', svgDocType);
+    svgDoc.replaceChild(svg, svgDoc.documentElement);
+    let svgData = (new XMLSerializer()).serializeToString(svgDoc);
+
+    let blob = new Blob([svgData.replace(/></g, '>\n\r<')]);
+    saveAs(blob, 'voronoi-' + Date.now() + '.svg');
+  }
+
+  // Generate a valid <path> element with `d` attribute using array of points
+  function createPathElFromPoints(points) {
+    let pointsString = '';
+
+    for(let [index, point] of points.entries()) {
+      pointsString += point[0] + ',' + point[1];
+
+      if(index < points.length - 1) {
+        pointsString += ' ';
+      }
+    }
+
+    let d = toPath({
+      type: 'polyline',
+      points: pointsString
+    });
+
+    let pathEl = document.createElement('path');
+    pathEl.setAttribute('d', d);
+    pathEl.setAttribute('style', 'fill: none; stroke: black; stroke-width: 1');
+
+    return pathEl;
   }
 }
 
