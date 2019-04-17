@@ -30,16 +30,19 @@
   <style>
   @import url('https://fonts.googleapis.com/css?family=Didact+Gothic');
 
-  body {
-    padding: 20px 0;
-  }
-
   ul {
     list-style: none;
     margin: 0 auto;
-    padding: 0;
+    padding: 20px 0 100px 0;
     width: 70%;
   }
+
+    @media screen and (max-width: 1024px) {
+      ul {
+        width: 100%;
+        padding: 0;
+      }
+    }
 
     ul li {
       margin: 0;
@@ -98,8 +101,17 @@
     <li>
       <a href="animated-rings/">
         <div class="overlay">Animated rings</div>
-        <video autoplay="true" loop="true">
+        <video autoplay="true" loop="true" preload="auto">
           <source src="images/animated-rings.webm" type="video/webm">
+        </video>
+      </a>
+    </li>
+    
+    <li>
+      <a href="orbits/">
+        <div class="overlay">Orbits</div>
+        <video autoplay="true" loop="true" preload="auto">
+          <source src="images/orbits-2.webm" type="video/webm">
         </video>
       </a>
     </li>
