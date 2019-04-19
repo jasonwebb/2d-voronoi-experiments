@@ -6,7 +6,8 @@ module.exports = {
     basic: path.resolve('basic/js/entry.js'),
     rings: path.resolve('rings/js/entry.js'),
     animatedRings: path.resolve('animated-rings/js/entry.js'),
-    orbits: path.resolve('orbits/js/entry.js')
+    orbits: path.resolve('orbits/js/entry.js'),
+    playground: path.resolve('playground/js/entry.js')
   },
   devtool: 'inline-source-map',
   devServer: {
