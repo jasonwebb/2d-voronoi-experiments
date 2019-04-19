@@ -12,6 +12,8 @@ Series of visual experiments exploring Voronoi diagrams using JavaScript
 ## Key commands
 
 | Key | Action                      |
+|---  |---                          |
 | `r` | Reset sketch                |
 | `i` | Invert colors               |
 | `p` | Toggle visibility of points |
+| `b` | Toggle blur effect          |
