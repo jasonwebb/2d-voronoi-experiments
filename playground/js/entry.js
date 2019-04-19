@@ -19,10 +19,6 @@ let showPoints = false,
     invertColors: false,
     blurEffect: false,
     showPoints: false
-  },
-  guiFunctions = {
-    randomize: function() { sketch.randomize(); },
-    export: function() { exportSVG(); }
   };
   
 const maxRadius = (window.innerWidth > window.innerHeight) ? window.innerHeight/2 - 10 : window.innerWidth/2 - 10,
@@ -155,14 +151,16 @@ const sketch = function (p5) {
     // Create Ring objects using params stored in guiVariables
     for(let ringParams of guiVariables.rings) {
       let ring = new Ring(ringParams.numPoints, currentRadius);
-      ring.radiusOffset = p5.random(-50,50);
+      ring.radiusOffset = ringParams.radiusOffset;
       ring.animationMode = ringParams.hasOwnProperty('animationMode') ? ringParams.animationMode : ring.animationMode;
+      ring.velocity = ringParams.velocity;
 
       // Generate subrings for each point of this ring, if specified
       if(ringParams.hasSubrings) {
         for(let point of ring.points) {
           let subring = new Ring(ringParams.subringNumPoints, ringParams.subringRadius, point[0], point[1]);
-          subring.animationMode = ringParams.subringAnimationMode;  
+          subring.animationMode = ringParams.subringAnimationMode;
+          subring.velocity = ringParams.subringVelocity;
           ring.subrings.push(subring);
         }
       }
@@ -204,7 +202,7 @@ const sketch = function (p5) {
   }
 
   // Build the dat.gui interface
-  function rebuildGUI() {
+  function rebuildGUI(openedFolderIndex = undefined) {
     // Remove all elements so that ring folders can be added/removed
     for(let element of Object.keys(guiElements)) {
       if(element != 'folders') {
@@ -218,6 +216,12 @@ const sketch = function (p5) {
 
     guiElements = {};
 
+    // Button functions
+    let guiFunctions = {
+      randomize: function() { randomize(); rebuildGUI(); generateRings(); },
+      export: function() { exportSVG(cells) }
+    }
+
     // Number of rings slider
     guiElements.numRingsSlider = gui.add(guiVariables, 'numRings', 3, 10, 1).onChange(generateRings);
 
@@ -230,14 +234,14 @@ const sketch = function (p5) {
       folder.add(ring, 'numPoints', 10, 100, 1).name('Number of points').onChange(generateRings);
       folder.add(ring, 'radiusOffset', -50, 50).name('Radius offset').onChange(generateRings);
       folder.add(ring, 'animationMode', ['rotation', 'radius']).name('Animation mode').onChange(generateRings);
-      // folders.add(add, 'velocity', .1, .001).name('Velocity').onChange(generateRings);
+      folder.add(ring, 'velocity', .1, .001).name('Velocity').onChange(generateRings);
 
       folder.add(ring, 'hasSubrings').name('Has subrings').onChange(function(checked) {
         if(checked) {
           ring.subringNumPoints = p5.random(10, 100);
           ring.subringRadius = p5.random(50, 200);
           ring.subringAnimationMode = 'rotation';
-          // ring.subringVelocity = p5.random(.001, .01);
+          ring.subringVelocity = p5.random(.001, .01);
         } else {
           delete ring.subringNumPoints;
           delete ring.subringRadius;
@@ -246,7 +250,7 @@ const sketch = function (p5) {
         }
 
         generateRings();
-        rebuildGUI();
+        rebuildGUI(index);
       });
 
       // Subring options
@@ -254,6 +258,12 @@ const sketch = function (p5) {
         folder.add(ring, 'subringNumPoints', 10, 100, 1).name('Subring point count').onChange(generateRings);
         folder.add(ring, 'subringRadius', 50, 200).name('Subring radius').onChange(generateRings);
         folder.add(ring, 'subringAnimationMode', ['rotation', 'radius']).name('Subring animation').onChange(generateRings);
+        folder.add(ring, 'subringVelocity', .001, .01).name('Subring velocity').onChange(generateRings);
+      }
+
+      // Open this folder if requested
+      if(openedFolderIndex != undefined && openedFolderIndex == index) {
+        folder.open();
       }
 
       guiElements.folders.push(folder);
@@ -325,6 +335,7 @@ const sketch = function (p5) {
       
       // Generate radius for this ring
       ringParams.animationMode = 'rotation';
+      ringParams.velocity = p5.random(-.001, .001);
       ringParams.radiusOffset = p5.random(-50,50);
       ringParams.hasSubrings = false;
       
