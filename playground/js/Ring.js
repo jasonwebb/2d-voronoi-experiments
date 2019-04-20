@@ -57,10 +57,10 @@ export default class Ring {
         break;
     }
 
-    for(let [index,ring] of this.subrings.entries()) {
-      ring.center.x = this.points[index][0];
-      ring.center.y = this.points[index][1];
-      ring.iterate();
+    for(let [index,subring] of this.subrings.entries()) {
+      subring.center.x = this.points[index][0];
+      subring.center.y = this.points[index][1];
+      subring.iterate();
     }
 
     this.generate();

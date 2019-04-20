@@ -21,8 +21,7 @@ let showPoints = false,
     showPoints: false
   };
   
-const maxRadius = (window.innerWidth > window.innerHeight) ? window.innerHeight/2 - 10 : window.innerWidth/2 - 10,
-  minRadius = 10;
+const maxPossibleRadius = (window.innerWidth > window.innerHeight) ? window.innerHeight/2 - 10 : window.innerWidth/2 - 10;
 
 const EVEN = 0,
   ODD = 1,
@@ -134,39 +133,34 @@ const sketch = function (p5) {
   function generateRings() {
     rings = [];
 
-    // Adjust number of rings in params array based on changes to numRings slider
-    if(guiVariables.numRings < guiVariables.rings.length) {   // numRings decreased - reduce the array size
-      guiVariables.rings = guiVariables.rings.slice(0, guiVariables.numRings);
-      
-    } else if(guiVariables.numRings > guiVariables.rings.length) {    // numRings increased - generate new ring params
-      for(let i=0; i < Math.abs(guiVariables.numRings - guiVariables.rings.length); i++) {
-        // let ringParams = generateRandomRingParams();
-      }
-    }
-
-    // Calculate radii
-    let currentRadius = maxRadius,
-        radiusStep = (maxRadius - minRadius) / guiVariables.numRings;
-
     // Create Ring objects using params stored in guiVariables
     for(let ringParams of guiVariables.rings) {
-      let ring = new Ring(ringParams.numPoints, currentRadius);
-      ring.radiusOffset = ringParams.radiusOffset;
+      let ring = new Ring(ringParams.numPoints, ringParams.radius);
+      ring.radius = ringParams.radius;
       ring.animationMode = ringParams.hasOwnProperty('animationMode') ? ringParams.animationMode : ring.animationMode;
-      ring.velocity = ringParams.velocity;
+      ring.velocity = ringParams.velocity / 10000;
 
       // Generate subrings for each point of this ring, if specified
       if(ringParams.hasSubrings) {
         for(let point of ring.points) {
           let subring = new Ring(ringParams.subringNumPoints, ringParams.subringRadius, point[0], point[1]);
           subring.animationMode = ringParams.subringAnimationMode;
-          subring.velocity = ringParams.subringVelocity;
+          subring.velocity = ringParams.subringVelocity / 10000;
           ring.subrings.push(subring);
         }
       }
 
       rings.push(ring);
-      currentRadius -= radiusStep;
+    }
+
+    // Run a single iteration when paused to force a new diagram to be drawn
+    if(isPaused) {
+      for(let ring of rings) {
+        ring.iterate();
+      }
+
+      // Get the latest points
+      points = getPoints();
     }
   }
 
@@ -189,12 +183,32 @@ const sketch = function (p5) {
     return pts;
   }
 
+  // Generate evenly-space radius values for each ring - called when numRings changes
+  function calculateRingRadii() {
+    for(let [index, ringParams] of guiVariables.rings.entries()) {
+      ringParams.radius = guiVariables.maxRadius - ((guiVariables.maxRadius - guiVariables.minRadius) / guiVariables.numRings) * (index);
+    }
+  }
+
+  // Adjust number of rings in params array based on changes to numRings slider
+  function adjustRingArray() {
+    if(guiVariables.numRings < guiVariables.rings.length) {   // numRings decreased - reduce the array size
+      guiVariables.rings = guiVariables.rings.slice(0, guiVariables.numRings);
+      
+    } else if(guiVariables.numRings > guiVariables.rings.length) {    // numRings increased - generate new ring params
+      for(let i=0; i < Math.abs(guiVariables.numRings - guiVariables.rings.length); i++) {
+        guiVariables.rings.push(generateRandomRingParams());
+      }
+    }
+  }
+
 
   /*
     UI functions
     ============
   */
 
+  // Create the UI panel with random initial values
   function initializeGUI() {
     gui = new dat.GUI();
     gui.width = 300;
@@ -202,7 +216,7 @@ const sketch = function (p5) {
   }
 
   // Build the dat.gui interface
-  function rebuildGUI(openedFolderIndex = undefined) {
+  function rebuildGUI(openedFolders = []) {
     // Remove all elements so that ring folders can be added/removed
     for(let element of Object.keys(guiElements)) {
       if(element != 'folders') {
@@ -219,11 +233,27 @@ const sketch = function (p5) {
     // Button functions
     let guiFunctions = {
       randomize: function() { randomize(); rebuildGUI(); generateRings(); },
-      export: function() { exportSVG(cells) }
+      export:    function() { exportSVG(cells) },
+      // delete:    function() {}
     }
 
     // Number of rings slider
-    guiElements.numRingsSlider = gui.add(guiVariables, 'numRings', 3, 10, 1).onChange(generateRings);
+    guiElements.numRingsSlider = gui.add(guiVariables, 'numRings', 1, 10, 1).name('Number of rings').onChange(function() {
+      adjustRingArray();
+      calculateRingRadii();
+      generateRings();
+    });
+
+    // Max/min radii
+    guiElements.maxRadiusSlider = gui.add(guiVariables, 'maxRadius', 100, maxPossibleRadius, 1).name('Maximum radius').onChange(function() {
+      calculateRingRadii();
+      generateRings();
+    });
+
+    guiElements.minRadiusSlider = gui.add(guiVariables, 'minRadius', 1, 100, 1).name('Minimum radius').onChange(function() {
+      calculateRingRadii();
+      generateRings();
+    });
 
     // Folders for each ring
     guiElements.folders = [];
@@ -231,17 +261,17 @@ const sketch = function (p5) {
       let folder = gui.addFolder('Ring ' + (index + 1));
 
       // Ring options
-      folder.add(ring, 'numPoints', 10, 100, 1).name('Number of points').onChange(generateRings);
-      folder.add(ring, 'radiusOffset', -50, 50).name('Radius offset').onChange(generateRings);
+      folder.add(ring, 'numPoints', 1, 100, 1).name('Number of points').onChange(generateRings);
+      folder.add(ring, 'radius', guiVariables.minRadius, guiVariables.maxRadius).name('Radius').onChange(generateRings);
       folder.add(ring, 'animationMode', ['rotation', 'radius']).name('Animation mode').onChange(generateRings);
-      folder.add(ring, 'velocity', .1, .001).name('Velocity').onChange(generateRings);
+      folder.add(ring, 'velocity', -100, 100, 1).name('Velocity').onChange(generateRings);
 
       folder.add(ring, 'hasSubrings').name('Has subrings').onChange(function(checked) {
         if(checked) {
-          ring.subringNumPoints = p5.random(10, 100);
+          ring.subringNumPoints = parseInt(p5.random(1, 100));
           ring.subringRadius = p5.random(50, 200);
           ring.subringAnimationMode = 'rotation';
-          ring.subringVelocity = p5.random(.001, .01);
+          ring.subringVelocity = p5.random(-.01, .01);
         } else {
           delete ring.subringNumPoints;
           delete ring.subringRadius;
@@ -249,20 +279,39 @@ const sketch = function (p5) {
           delete ring.subringVelocity;
         }
 
+        let openedFolders = getOpenedFolderIndices();
+
         generateRings();
-        rebuildGUI(index);
+        rebuildGUI(openedFolders);
       });
 
       // Subring options
       if(ring.hasSubrings) {
-        folder.add(ring, 'subringNumPoints', 10, 100, 1).name('Subring point count').onChange(generateRings);
+        folder.add(ring, 'subringNumPoints', 1, 100, 1).name('Subring point count').onChange(generateRings);
         folder.add(ring, 'subringRadius', 50, 200).name('Subring radius').onChange(generateRings);
         folder.add(ring, 'subringAnimationMode', ['rotation', 'radius']).name('Subring animation').onChange(generateRings);
-        folder.add(ring, 'subringVelocity', .001, .01).name('Subring velocity').onChange(generateRings);
+        folder.add(ring, 'subringVelocity', -100, 100, 1).name('Subring velocity').onChange(generateRings);
       }
 
+      // Delete button
+      // folder.add(guiFunctions, 'delete').name('Delete this ring').onChange(function() {
+      //   if(Object.keys(gui.__folders).length > 1) {
+      //     // Reduce and update the numRings slider value
+      //     guiVariables.numRings--;
+      //     guiElements.numRingsSlider.setValue(guiVariables.numRings);
+
+      //     // Remove this folder from the GUI
+      //     guiElements.folders = guiElements.folders.slice(index, index+1);
+      //     gui.removeFolder(folder);
+
+      //     generateRings();
+      //   } else {
+      //     alert('nice try');
+      //   }
+      // });
+
       // Open this folder if requested
-      if(openedFolderIndex != undefined && openedFolderIndex == index) {
+      if(openedFolders.includes(index)) {
         folder.open();
       }
 
@@ -284,63 +333,66 @@ const sketch = function (p5) {
     function toggleShowPoints()   { showPoints = !showPoints; }
 
 
+  // Randomize the parameters stored in guiVariables
   function randomize() {
     guiVariables.numRings = parseInt(p5.random(3,10));
+    guiVariables.maxRadius = p5.random(maxPossibleRadius - 200, maxPossibleRadius);
+    guiVariables.minRadius = 10;
     
     guiVariables.rings = [];
-    let currentRowType = EVEN;
 
     for(let i = 0; i < guiVariables.numRings; i++) {
-      let ringParams = {}, range = [];
-      const rowType = parseInt(p5.random(0,3));
+      let ringParams, pointDensity;
       
       // Rings near the center look better with fewer points
       if (i > 3) {
-        range[0] = 5;
-        range[1] = 10;
+        pointDensity = 'LOW';
       } else {
-        range[0] = 20;
-        range[1] = 100;
+        pointDensity = 'HIGH';
       }
 
-      // Generate number of points in this ring
-      switch(rowType) {
-        case EVEN:
-          ringParams.numPoints = getRandomEvenNumber(range[0], range[1]);
-          break;
-
-        case ODD:
-          ringParams.numPoints = getRandomOddNumber(range[0], range[1]);
-          break;
-
-        case ALTERNATING:
-          switch (currentRowType) {
-            case EVEN:
-              ringParams.numPoints = getRandomEvenNumber(range[0], range[1]);
-              currentRowType = ODD;
-              break;
-
-            case ODD:
-              ringParams.numPoints = getRandomOddNumber(range[0], range[1]);
-              currentRowType = EVEN;
-              break;
-          }
-
-          break;
-
-        case ANY:
-          ringParams.numPoints = parseInt(p5.random(range[0], range[1]));
-          break;
-      }
-      
-      // Generate radius for this ring
-      ringParams.animationMode = 'rotation';
-      ringParams.velocity = p5.random(-.001, .001);
-      ringParams.radiusOffset = p5.random(-50,50);
-      ringParams.hasSubrings = false;
-      
+      ringParams = generateRandomRingParams(pointDensity);      
       guiVariables.rings.push(ringParams);
     }
+
+    calculateRingRadii();
+  }
+  
+  // Generate random parameters for a single ring
+  function generateRandomRingParams(pointDensity = 'HIGH') {
+    let ringParams = {}, range = [];
+
+    switch(pointDensity) {
+      case 'LOW':
+        range[0] = 5;
+        range[1] = 10;
+        break;
+      case 'HIGH':
+        range[0] = 20;
+        range[1] = 70;
+        break;
+    }
+
+    ringParams.numPoints = parseInt(p5.random(range[0], range[1]));
+    ringParams.animationMode = 'rotation';
+    ringParams.velocity = p5.random(-10, 10);
+    ringParams.hasSubrings = false;
+
+    return ringParams;
+  }
+
+  // Get a list of all the folders that are currently opened
+  function getOpenedFolderIndices() {
+    let openedFolders = [],
+    folderElements = Object.values(gui.__folders);
+
+    for(let i=0; i<folderElements.length; i++) {
+      if(!folderElements[i].closed) {
+        openedFolders.push(i);
+      }
+    }
+
+    return openedFolders;
   }
   
 
@@ -352,6 +404,8 @@ const sketch = function (p5) {
     switch (p5.key) {
       case 'r':
         randomize();
+        generateRings();
+        rebuildGUI();
         break;
 
       case 'p':
