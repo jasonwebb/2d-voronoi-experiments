@@ -130,7 +130,7 @@ const sketch = function (p5) {
     // Create Ring objects using params stored in guiVariables
     for(let ringParams of guiVariables.rings) {
       let ring = new Ring(ringParams.numPoints, ringParams.radius);
-      ring.radius = ringParams.radius;
+      ring.radiusOffset = ringParams.radiusOffset;
       ring.animationMode = ringParams.hasOwnProperty('animationMode') ? ringParams.animationMode : ring.animationMode;
       ring.velocity = ringParams.velocity / 10000;
 
@@ -256,7 +256,7 @@ const sketch = function (p5) {
 
       // Ring options
       folder.add(ring, 'numPoints', 1, 100, 1).name('Number of points').onChange(generateRings);
-      folder.add(ring, 'radius', guiVariables.minRadius, guiVariables.maxRadius).name('Radius').onChange(generateRings);
+      folder.add(ring, 'radiusOffset', -((guiVariables.maxRadius - guiVariables.minRadius) / guiVariables.numRings), (guiVariables.maxRadius - guiVariables.minRadius) / guiVariables.numRings).name('Radius offset').onChange(generateRings);
       folder.add(ring, 'animationMode', ['rotation', 'radius']).name('Animation mode').onChange(generateRings);
       folder.add(ring, 'velocity', -100, 100, 1).name('Velocity').onChange(generateRings);
 
@@ -368,6 +368,7 @@ const sketch = function (p5) {
     }
 
     ringParams.numPoints = parseInt(p5.random(range[0], range[1]));
+    ringParams.radiusOffset = p5.random( -((guiVariables.maxRadius - guiVariables.minRadius) / guiVariables.numRings) / 2, (guiVariables.maxRadius - guiVariables.minRadius) / guiVariables.numRings / 2);
     ringParams.animationMode = 'rotation';
     ringParams.velocity = p5.random(-10, 10);
     ringParams.hasSubrings = false;
