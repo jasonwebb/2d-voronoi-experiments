@@ -3,10 +3,7 @@ import Ring from "./Ring";
 import { exportSVG } from './export-functions';
 import { getVoronoiPolygons } from './voronoi-functions';
 
-let showPoints = false,
-  invertColors = false,
-  useBlurEffect = false,
-  isPaused = false,
+let isPaused = false,
   points = [],
   cells = [],
   rings = [],
@@ -63,8 +60,8 @@ const sketch = function (p5) {
   // Draw the Voronoi diagram for a set of points
   function drawVoronoi() {
     // Set colors
-    if (invertColors) {
-      if(useBlurEffect) {
+    if (guiVariables.invertColors) {
+      if(guiVariables.blurEffect) {
         p5.background(0, 20);
       } else {
         p5.background(0);
@@ -72,7 +69,7 @@ const sketch = function (p5) {
 
       p5.stroke(255);
     } else {
-      if(useBlurEffect) {
+      if(guiVariables.blurEffect) {
         p5.background(255, 25);
       } else {
         p5.background(255);
@@ -100,11 +97,11 @@ const sketch = function (p5) {
   
   // Draw dots for each of the points
   function drawPoints() {
-    if (showPoints) {
+    if (guiVariables.showPoints) {
       // Set colors
       p5.noStroke();
 
-      if (invertColors) {
+      if (guiVariables.invertColors) {
         p5.fill(100);
       } else {
         p5.fill(200);
@@ -313,18 +310,14 @@ const sketch = function (p5) {
     }
 
     // Feature toggles
-    guiElements.invertColorsCheckbox = gui.add(guiVariables, 'invertColors').name('Invert colors').onChange(toggleInvertColors);
-    guiElements.blurEffectCheckbox   = gui.add(guiVariables, 'blurEffect').name('Blur effect').onChange(toggleBlurEffect);
-    guiElements.showPointsCheckbox   = gui.add(guiVariables, 'showPoints').name('Show points').onChange(toggleShowPoints);
+    guiElements.invertColorsCheckbox = gui.add(guiVariables, 'invertColors').name('Invert colors');
+    guiElements.blurEffectCheckbox   = gui.add(guiVariables, 'blurEffect').name('Blur effect');
+    guiElements.showPointsCheckbox   = gui.add(guiVariables, 'showPoints').name('Show points');
 
     // Buttons
     guiElements.randomizeButton = gui.add(guiFunctions, 'randomize').name('Randomize');
     guiElements.exportButton   = gui.add(guiFunctions, 'export').name('Export as SVG');
   }
-
-    function toggleInvertColors() { invertColors = !invertColors; }
-    function toggleBlurEffect()   { useBlurEffect = !useBlurEffect; }
-    function toggleShowPoints()   { showPoints = !showPoints; }
 
 
   // Randomize the parameters stored in guiVariables
@@ -404,15 +397,18 @@ const sketch = function (p5) {
         break;
 
       case 'p':
-        showPoints = !showPoints;
+        guiVariables.showPoints = !guiVariables.showPoints;
+        rebuildGUI(getOpenedFolderIndices());
         break;
 
       case 'i':
-        invertColors = !invertColors;
+        guiVariables.invertColors = !guiVariables.invertColors;
+        rebuildGUI(getOpenedFolderIndices());
         break;
 
       case 'b':
-        useBlurEffect = !useBlurEffect;
+        guiVariables.blurEffect = !guiVariables.blurEffect;
+        rebuildGUI(getOpenedFolderIndices());
         break;
 
       case ' ':
