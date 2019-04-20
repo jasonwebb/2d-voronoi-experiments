@@ -1,4 +1,4 @@
-import {Delaunay} from "d3-delaunay";
+import { Delaunay } from "d3-delaunay";
 
 // Build an array of polygons (arrays of [x,y] pairs) extracted from Voronoi package
 export function getVoronoiPolygons(points) {

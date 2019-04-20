@@ -1,8 +1,7 @@
 import * as dat from 'dat.gui';
 import Ring from "./Ring";
-import { getRandomEvenNumber, getRandomOddNumber } from './math-utilities';
-import { exportSVG } from './export-utilities';
-import { getVoronoiPolygons } from './voronoi-utilities';
+import { exportSVG } from './export-functions';
+import { getVoronoiPolygons } from './voronoi-functions';
 
 let showPoints = false,
   invertColors = false,
@@ -22,11 +21,6 @@ let showPoints = false,
   };
   
 const maxPossibleRadius = (window.innerWidth > window.innerHeight) ? window.innerHeight/2 - 10 : window.innerWidth/2 - 10;
-
-const EVEN = 0,
-  ODD = 1,
-  ALTERNATING = 2,
-  ANY = 3;
 
 const sketch = function (p5) {
   /*
@@ -426,26 +420,6 @@ const sketch = function (p5) {
 
       case 'e':
         exportSVG(cells);
-        break;
-
-      case '1':
-        ROW_TYPE = EVEN;
-        generatePoints();
-        break;
-
-      case '2':
-        ROW_TYPE = ODD;
-        generatePoints();
-        break;
-
-      case '3':
-        ROW_TYPE = ALTERNATING;
-        generatePoints();
-        break;
-
-      case '4':
-        ROW_TYPE = ANY;
-        generatePoints();
         break;
     }
   }
