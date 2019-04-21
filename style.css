@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css?family=Didact+Gothic');
+
+body {
+  padding: 0 15%;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+  @media screen and (max-width: 1024px) {
+    body {
+      padding: 0 5%;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    body {
+      padding: 0 2%
+    }
+  }
+
+
+/*
+  Header
+  ======
+  Introduction and source link on home page
+*/
+header {
+  margin-top: 40px;
+  margin-bottom: 50px !important;
+}
+
+  @media screen and (max-width: 768px) {
+    header {
+      margin-top: 20px;
+    }
+  }
+
+  header .button {
+    margin-top: 20px;
+  }
+
+    header .button .fab {
+      padding-right: 10px;
+    }
+
+
+/*
+  Main section
+  ============
+  Contains list of linked images/videos on home page
+*/
+main {}
+
+  main ul {
+    list-style: none;
+    margin: 0 auto;
+    padding: 20px 0 100px 0;
+    /* width: 70%; */
+  }
+
+    @media screen and (max-width: 1024px) {
+      main ul {
+        width: 100%;
+        padding: 0;
+      }
+    }
+
+    main ul li {
+      margin: 0;
+    }
+
+    main ul li a {
+      display: block;
+      position: relative;
+    }
+
+      main ul li a .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,.9);
+        opacity: 0;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity .5s ease-in-out;
+        font-family: 'Didact Gothic', sans-serif;
+        font-size: 60px;
+      }
+
+        main ul li a:hover .overlay {
+          opacity: 1;
+        }
+
+      main ul li a img,
+      main ul li a video {
+        width: 100%;
+        height: auto;
+      }
