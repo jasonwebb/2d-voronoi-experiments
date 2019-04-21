@@ -7,13 +7,7 @@ body {
 
   @media screen and (max-width: 1024px) {
     body {
-      padding: 0 5%;
-    }
-  }
-
-  @media screen and (max-width: 480px) {
-    body {
-      padding: 0 2%
+      padding: 0 4%;
     }
   }
 
