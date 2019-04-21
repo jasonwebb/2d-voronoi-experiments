@@ -133,11 +133,9 @@ const sketch = function (p5) {
   function generatePoints() {
     points = [], rings = [];
     let numRings = parseInt(p5.random(3,10));
-    // let numRings = 3;
     const maxRadius = (window.innerWidth > window.innerHeight) ? window.innerHeight/2 - 10 : window.innerWidth/2 - 10;
     const minRadius = p5.random(10, 30);
-    // let currentRadius = maxRadius;
-    let currentRadius = 300;
+    let currentRadius = maxRadius;
     const radiusStep = (maxRadius - minRadius) / numRings;
 
     // Generate set of points for Voronoi diagram
