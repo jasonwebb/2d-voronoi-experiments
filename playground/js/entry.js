@@ -260,7 +260,7 @@ const sketch = function (p5) {
       folder.add(ring, 'hasSubrings').name('Has subrings').onChange(function(checked) {
         if(checked) {
           ring.subringNumPoints = parseInt(p5.random(1, 100));
-          ring.subringRadius = p5.random(50, 200);
+          ring.subringRadius = p5.random(10, 100);
           ring.subringAnimationMode = 'rotation';
           ring.subringVelocity = p5.random(-.01, .01);
         } else {
@@ -279,7 +279,7 @@ const sketch = function (p5) {
       // Subring options
       if(ring.hasSubrings) {
         folder.add(ring, 'subringNumPoints', 1, 100, 1).name('Subring point count').onChange(generateRings);
-        folder.add(ring, 'subringRadius', 50, 200).name('Subring radius').onChange(generateRings);
+        folder.add(ring, 'subringRadius', 10, 100).name('Subring radius').onChange(generateRings);
         folder.add(ring, 'subringAnimationMode', ['rotation', 'radius']).name('Subring animation').onChange(generateRings);
         folder.add(ring, 'subringVelocity', -100, 100, 1).name('Subring velocity').onChange(generateRings);
       }
