@@ -7,7 +7,9 @@ module.exports = {
     rings: path.resolve('rings/js/entry.js'),
     ringsInMotion: path.resolve('rings-in-motion/js/entry.js'),
     orbits: path.resolve('orbits/js/entry.js'),
-    playground: path.resolve('playground/js/entry.js')
+    playground: path.resolve('playground/js/entry.js'),
+    reducingRadii: path.resolve('reducing-radii/js/entry.js'),
+    phyllotaxis: path.resolve('phyllotaxis/js/entry.js')
   },
   devtool: 'inline-source-map',
   devServer: {
