@@ -35,3 +35,7 @@ Series of visual experiments exploring Voronoi diagrams using JavaScript
 ![Orbits](media/orbits.gif)
 
 ![Playground](media/playground.png)
+
+![Reducing radii](media/reducing-radii.png)
+
+![Phyllotaxis](media/phyllotaxis.png)
