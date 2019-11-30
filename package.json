@@ -20,11 +20,11 @@
   "devDependencies": {
     "d3-delaunay": "^4.1.5",
     "dat.gui": "^0.7.6",
-    "file-saver": "^2.0.1",
+    "file-saver": "^2.0.2",
     "path": "^0.12.7",
     "svg-points": "^6.0.1",
-    "webpack": "^4.29.5",
-    "webpack-cli": "^3.2.3",
-    "webpack-dev-server": "^3.2.1"
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
   }
 }
