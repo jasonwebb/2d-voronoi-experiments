@@ -41,7 +41,7 @@ const sketch = function (p5) {
 
       // Get the latest points
       points = getPoints();
-  
+
       drawVoronoi();
       drawPoints();
     }
@@ -52,7 +52,7 @@ const sketch = function (p5) {
     Custom functions
     ================
   */
- 
+
   // Build an array of polygons (arrays of [x,y] pairs) extracted from Voronoi package
   function getVoronoiPolygons() {
     const delaunay = Delaunay.from(points);
@@ -90,7 +90,7 @@ const sketch = function (p5) {
       } else {
         p5.background(255);
       }
-      
+
       p5.stroke(0);
     }
 
@@ -110,7 +110,7 @@ const sketch = function (p5) {
       p5.endShape();
     }
   }
-  
+
   // Draw dots for each of the points
   function drawPoints() {
     if (showPoints) {
@@ -129,7 +129,7 @@ const sketch = function (p5) {
       }
     }
   }
-  
+
   function generatePoints() {
     points = [], rings = [];
     let numRings = parseInt(p5.random(3,10));
@@ -152,7 +152,7 @@ const sketch = function (p5) {
           range[1] = 100;
         }
 
-        // TODO: make range proportional to i. 
+        // TODO: make range proportional to i.
 
         // Generate a random number of points based on selected "row type"
         switch (ROW_TYPE) {
@@ -186,7 +186,7 @@ const sketch = function (p5) {
 
         ring = new Ring(numPoints, currentRadius);
 
-  
+
       // Add sub-rings to the outermost main ring
       } else {
         numPoints = parseInt(p5.random(5,12));
@@ -217,7 +217,7 @@ const sketch = function (p5) {
   function getPoints() {
     let pts = [];
 
-    // Extract all points from all rings and sub-rings 
+    // Extract all points from all rings and sub-rings
     for(let ring of rings) {
       for(let point of ring.points) {
         pts.push(point);
@@ -260,12 +260,12 @@ const sketch = function (p5) {
 
     return num;
   }
-  
+
   function exportSVG() {
     // Set up <svg> element
-    let svg = document.createElement('svg');
-    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+    let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xlink', 'http://www.w3.org/1999/xlink');
     svg.setAttribute('width', window.innerWidth);
     svg.setAttribute('height', window.innerHeight);
     svg.setAttribute('viewBox', '0 0 ' + window.innerWidth + ' ' + window.innerHeight);
@@ -276,13 +276,10 @@ const sketch = function (p5) {
       svg.appendChild( createPathElFromPoints(polygon) );
     }
 
-    // Force download of .svg file based on https://jsfiddle.net/ch77e7yh/1
-    let svgDocType = document.implementation.createDocumentType('svg', "-//W3C//DTD SVG 1.1//EN", "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd");
-    let svgDoc = document.implementation.createDocument('http://www.w3.org/2000/svg', 'svg', svgDocType);
-    svgDoc.replaceChild(svg, svgDoc.documentElement);
-    let svgData = (new XMLSerializer()).serializeToString(svgDoc);
-
-    let blob = new Blob([svgData.replace(/></g, '>\n\r<')]);
+    // Generate the document as a Blob and force a download as a timestamped .svg file
+    const svgDoctype = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>';
+    const serializedSvg = (new XMLSerializer()).serializeToString(svg);
+    const blob = new Blob([svgDoctype, serializedSvg], { type: 'image/svg+xml;' })
     saveAs(blob, 'voronoi-' + Date.now() + '.svg');
   }
 
@@ -302,13 +299,13 @@ const sketch = function (p5) {
       points: pointsString
     });
 
-    let pathEl = document.createElement('path');
+    let pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     pathEl.setAttribute('d', d);
     pathEl.setAttribute('style', 'fill: none; stroke: black; stroke-width: 1');
 
     return pathEl;
   }
-  
+
 
   /*
     Key released handler

@@ -54,7 +54,7 @@ const sketch = function (p5) {
       case 'i':
         invertColors = !invertColors;
         break;
-      
+
       case 'e':
         exportSVG();
         break;
@@ -170,7 +170,7 @@ const sketch = function (p5) {
         range[1] = 100;
       }
 
-      // TODO: make range proportional to i. 
+      // TODO: make range proportional to i.
 
       // Generate a random number of points based on selected "row type"
       switch (ROW_TYPE) {
@@ -246,9 +246,9 @@ const sketch = function (p5) {
   // Export an SVG file of the current geometry
   function exportSVG() {
     // Set up <svg> element
-    let svg = document.createElement('svg');
-    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+    let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xlink', 'http://www.w3.org/1999/xlink');
     svg.setAttribute('width', window.innerWidth);
     svg.setAttribute('height', window.innerHeight);
     svg.setAttribute('viewBox', '0 0 ' + window.innerWidth + ' ' + window.innerHeight);
@@ -259,17 +259,13 @@ const sketch = function (p5) {
       svg.appendChild( createPathElFromPoints(polygon) );
     }
 
-    // Force download of .svg file based on https://jsfiddle.net/ch77e7yh/1
-    let svgDocType = document.implementation.createDocumentType('svg', "-//W3C//DTD SVG 1.1//EN", "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd");
-    let svgDoc = document.implementation.createDocument('http://www.w3.org/2000/svg', 'svg', svgDocType);
-    svgDoc.replaceChild(svg, svgDoc.documentElement);
-    let svgData = (new XMLSerializer()).serializeToString(svgDoc);
-
-    let blob = new Blob([svgData.replace(/></g, '>\n\r<')]);
+    // Generate the document as a Blob and force a download as a timestamped .svg file
+    const svgDoctype = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>';
+    const serializedSvg = (new XMLSerializer()).serializeToString(svg);
+    const blob = new Blob([svgDoctype, serializedSvg], { type: 'image/svg+xml;' })
     saveAs(blob, 'voronoi-' + Date.now() + '.svg');
   }
 
-  // Generate a valid <path> element with `d` attribute using array of points
   function createPathElFromPoints(points) {
     let pointsString = '';
 
@@ -286,7 +282,7 @@ const sketch = function (p5) {
       points: pointsString
     });
 
-    let pathEl = document.createElement('path');
+    let pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     pathEl.setAttribute('d', d);
     pathEl.setAttribute('style', 'fill: none; stroke: black; stroke-width: 1');
 
